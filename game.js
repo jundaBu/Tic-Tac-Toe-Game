@@ -8,8 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const modeStatusDiv = document.getElementById('mode-status');
     const aiAlgoSelect = document.getElementById('ai-algo-select');
     const aiTimerDiv = document.getElementById('ai-timer');
-    const soundX = document.getElementById('sound-x');
-    const soundO = document.getElementById('sound-o');
 
     let board = Array(9).fill('');
     let currentPlayer = 'X';
@@ -29,20 +27,11 @@ document.addEventListener("DOMContentLoaded", function () {
         for (const pattern of winPatterns) {
             const [a, b1, c] = pattern;
             if (b[a] && b[a] === b[b1] && b[a] === b[c]) {
-                return b[a];
+                // Return both winner and winning pattern
+                return { winner: b[a], pattern };
             }
         }
-        return b.includes('') ? null : 'draw';
-    }
-
-    function playMoveSound(player) {
-        if (player === 'X') {
-            soundX.currentTime = 0;
-            soundX.play();
-        } else if (player === 'O') {
-            soundO.currentTime = 0;
-            soundO.play();
-        }
+        return b.includes('') ? null : { winner: 'draw', pattern: null };
     }
 
     function handleCellClick(e) {
@@ -52,7 +41,6 @@ document.addEventListener("DOMContentLoaded", function () {
         board[idx] = currentPlayer;
         e.target.textContent = currentPlayer;
         e.target.classList.add(currentPlayer.toLowerCase());
-        playMoveSound(currentPlayer);
 
         const result = checkWinner(board);
         if (result) {
@@ -77,7 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     board[aiMove] = ai;
                     cells[aiMove].textContent = ai;
                     cells[aiMove].classList.add(ai.toLowerCase());
-                    playMoveSound(ai);
                     const resultAfterAI = checkWinner(board);
                     if (resultAfterAI) {
                         endGame(resultAfterAI);
@@ -97,10 +84,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function endGame(result) {
         gameActive = false;
-        if (result === 'draw') {
+        if (result.winner === 'draw') {
             statusDiv.textContent = "It's a draw!";
         } else {
-            statusDiv.textContent = `Player ${result} wins!`;
+            statusDiv.textContent = `Player ${result.winner} wins!`;
+            if (result.pattern) {
+                result.pattern.forEach(idx => {
+                    cells[idx].classList.add('highlight');
+                });
+            }
         }
     }
 
@@ -112,6 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
         cells.forEach(cell => {
             cell.textContent = '';
             cell.classList.remove('x', 'o');
+            cell.classList.remove('highlight');
         });
         aiTimerDiv.textContent = "AI move time: -- ms";
     }
@@ -135,9 +128,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function minimax(b, depth, isMaximizing) {
         const result = checkWinner(b);
-        if (result === ai) return 10 - depth;
-        if (result === human) return depth - 10;
-        if (result === 'draw') return 0;
+        if (result) {
+            if (result.winner === ai) return 10 - depth;
+            if (result.winner === human) return depth - 10;
+            if (result.winner === 'draw') return 0;
+        }
 
         if (isMaximizing) {
             let bestScore = -Infinity;
@@ -183,9 +178,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function alphabeta(b, depth, isMaximizing, alpha, beta) {
         const result = checkWinner(b);
-        if (result === ai) return 10 - depth;
-        if (result === human) return depth - 10;
-        if (result === 'draw') return 0;
+        if (result) {
+            if (result.winner === ai) return 10 - depth;
+            if (result.winner === human) return depth - 10;
+            if (result.winner === 'draw') return 0;
+        }
 
         if (isMaximizing) {
             let bestScore = -Infinity;
@@ -244,7 +241,6 @@ document.addEventListener("DOMContentLoaded", function () {
         board[aiMove] = currentPlayer;
         cells[aiMove].textContent = currentPlayer;
         cells[aiMove].classList.add(currentPlayer.toLowerCase());
-        playMoveSound(currentPlayer);
         const result = checkWinner(board);
         if (result) {
             endGame(result);
@@ -257,6 +253,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Set initial mode status on load
     modeStatusDiv.textContent = mode === 'ai' ? "Mode: Human vs AI" : "Mode: Human vs Human";
+
+    // Randomize title colors and glow
+    function getRandomColor() {
+        const h = Math.floor(Math.random() * 360);
+        const s = 70 + Math.floor(Math.random() * 30); // 70-100%
+        const l = 50 + Math.floor(Math.random() * 20); // 50-70%
+        return `hsl(${h},${s}%,${l}%)`;
+    }
+    function setTitleColorAndGlow(element) {
+        if (!element) return;
+        const color = getRandomColor();
+        element.style.color = color;
+        // Use a strong glow with the same color, plus a subtle black shadow
+        element.style.textShadow = `0 0 18px ${color}, 2px 2px 8px rgba(0,0,0,0.25)`;
+    }
+    setTitleColorAndGlow(document.querySelector('.tic'));
+    setTitleColorAndGlow(document.querySelector('.tac'));
+    setTitleColorAndGlow(document.querySelector('.toe'));
 
     aiBtn.addEventListener('click', () => setMode('ai'));
     humanBtn.addEventListener('click', () => setMode('human'));

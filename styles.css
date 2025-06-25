@@ -10,9 +10,33 @@ body {
 
 h1 {
     margin-bottom: 30px;
-    font-size: 3rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    font-size: 3.2rem;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.25);
     color: #fff;
+    letter-spacing: 2px;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+}
+
+h1 .tic {
+    /* color and text-shadow set by JS */
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+h1 .tac {
+    /* color and text-shadow set by JS */
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+h1 .toe {
+    /* color and text-shadow set by JS */
+    font-weight: 900;
+    letter-spacing: 1px;
 }
 
 #game-board {
@@ -75,10 +99,16 @@ h1 {
 }
 
 #mode-status {
-    font-size: 1.1rem;
-    margin-bottom: 15px;
-    color: #f8f9fa;
-    font-weight: 500;
+    font-size: 1.2rem;
+    margin-bottom: 18px;
+    color: #ffe082;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.22);
+    background: rgba(255, 255, 255, 0.13);
+    padding: 10px 20px;
+    border-radius: 25px;
+    display: inline-block;
+    letter-spacing: 1px;
 }
 
 #reset-btn {
@@ -173,4 +203,11 @@ h1 {
     display: inline-block;
     margin-bottom: 20px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.cell.highlight {
+    background: linear-gradient(135deg, #fff176 60%, #ffd54f 100%);
+    box-shadow: 0 0 18px 6px #ffe082, 0 4px 15px rgba(0,0,0,0.2);
+    border: 2px solid #ffd600;
+    z-index: 1;
 }
