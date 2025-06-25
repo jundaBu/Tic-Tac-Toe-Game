@@ -169,6 +169,17 @@ h1 .toe {
     box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
 }
 
+#aivai-btn {
+    background: linear-gradient(45deg, #ff9800, #f57c00);
+    color: white;
+}
+
+#aivai-btn:hover {
+    background: linear-gradient(45deg, #f57c00, #e65100);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+}
+
 #ai-algo-select-container {
     margin-bottom: 25px;
     background: rgba(255, 255, 255, 0.1);
