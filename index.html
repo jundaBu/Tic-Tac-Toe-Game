@@ -7,7 +7,19 @@
 </head>
 <body>
     <h1>Tic Tac Toe</h1>
+    <div id="mode-status">Mode: Human vs AI</div>
     <div id="status">Player X's turn</div>
+    <div id="mode-buttons">
+    <button id="human-btn">Human vs Human</button>
+    <button id="ai-btn">Human vs AI</button>
+    </div>
+    <div id="ai-algo-select-container">
+    <label for="ai-algo-select">AI Algorithm:</label>
+    <select id="ai-algo-select">
+        <option value="minimax">Minimax</option>
+        <option value="alphabeta">AlphaBeta Pruning</option>
+    </select>
+    </div>
     <div id="game-board">
         <div class="cell" data-index="0"></div>
         <div class="cell" data-index="1"></div>
