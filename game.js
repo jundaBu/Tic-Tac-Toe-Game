@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         board[idx] = currentPlayer;
         e.target.textContent = currentPlayer;
+        e.target.classList.add(currentPlayer.toLowerCase());
 
         const result = checkWinner(board);
         if (result) {
@@ -57,6 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                     board[aiMove] = ai;
                     cells[aiMove].textContent = ai;
+                    cells[aiMove].classList.add(ai.toLowerCase());
                     const resultAfterAI = checkWinner(board);
                     if (resultAfterAI) {
                         endGame(resultAfterAI);
@@ -86,7 +88,10 @@ document.addEventListener("DOMContentLoaded", function () {
         currentPlayer = 'X';
         gameActive = true;
         statusDiv.textContent = "Player X's turn";
-        cells.forEach(cell => cell.textContent = '');
+        cells.forEach(cell => {
+            cell.textContent = '';
+            cell.classList.remove('x', 'o');
+        });
     }
 
     function findBestMove(boardState) {
