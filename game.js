@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const resetBtn = document.getElementById('reset-btn');
     const aiBtn = document.getElementById('ai-btn');
     const humanBtn = document.getElementById('human-btn');
+    const aivaiBtn = document.getElementById('aivai-btn');
     const modeStatusDiv = document.getElementById('mode-status');
     const aiAlgoSelect = document.getElementById('ai-algo-select');
 
@@ -66,6 +67,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }, 300);
             }
+        } else if (mode === 'aivai') {
+            setTimeout(aiVsAiTurn, 500);
         } else {
             currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
             statusDiv.textContent = `Player ${currentPlayer}'s turn`;
@@ -193,7 +196,34 @@ document.addEventListener("DOMContentLoaded", function () {
         mode = newMode;
         resetGame();
         statusDiv.textContent = "Player X's turn";
-        modeStatusDiv.textContent = mode === 'ai' ? "Mode: Human vs AI" : "Mode: Human vs Human";
+        if (mode === 'ai') {
+            modeStatusDiv.textContent = "Mode: Human vs AI";
+        } else if (mode === 'human') {
+            modeStatusDiv.textContent = "Mode: Human vs Human";
+        } else if (mode === 'aivai') {
+            modeStatusDiv.textContent = "Mode: AI vs AI";
+            setTimeout(aiVsAiTurn, 500);
+        }
+    }
+
+    function aiVsAiTurn() {
+        if (!gameActive) return;
+        let aiMove;
+        if (aiAlgorithm === 'minimax') {
+            aiMove = findBestMove(board);
+        } else {
+            aiMove = findBestMoveAlphaBeta(board);
+        }
+        board[aiMove] = currentPlayer;
+        cells[aiMove].textContent = currentPlayer;
+        const result = checkWinner(board);
+        if (result) {
+            endGame(result);
+            return;
+        }
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+        setTimeout(aiVsAiTurn, 500);
     }
 
     // Set initial mode status on load
@@ -201,6 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     aiBtn.addEventListener('click', () => setMode('ai'));
     humanBtn.addEventListener('click', () => setMode('human'));
+    aivaiBtn.addEventListener('click', () => setMode('aivai'));
     cells.forEach(cell => cell.addEventListener('click', handleCellClick));
     resetBtn.addEventListener('click', resetGame);
     aiAlgoSelect.addEventListener('change', function () {
