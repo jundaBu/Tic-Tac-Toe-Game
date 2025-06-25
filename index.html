@@ -22,6 +22,7 @@
         <option value="alphabeta">AlphaBeta Pruning</option>
     </select>
     </div>
+    <div id="ai-timer" style="margin-bottom:15px;">AI move time: -- ms</div>
     <div id="game-board">
         <div class="cell" data-index="0"></div>
         <div class="cell" data-index="1"></div>
@@ -33,8 +34,8 @@
         <div class="cell" data-index="7"></div>
         <div class="cell" data-index="8"></div>
     </div>
-    
-
+    <audio id="sound-x" src="move-x.mp3" preload="auto"></audio>
+    <audio id="sound-o" src="move-o.mp3" preload="auto"></audio>
     <script src="game.js"></script>
 </body>
 </html>
