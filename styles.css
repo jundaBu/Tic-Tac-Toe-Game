@@ -44,3 +44,18 @@ h1 {
     font-size: 1rem;
     cursor: pointer;
 }
+
+#mode-buttons {
+    margin-bottom: 15px;
+}
+
+#mode-buttons button {
+    margin: 0 10px;
+    padding: 6px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#ai-algo-select-container {
+    margin-bottom: 15px;
+}
