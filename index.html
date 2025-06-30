@@ -11,8 +11,10 @@
         <span class="tac">Tac</span>
         <span class="toe">Toe</span>
     </h1>
-    <div id="mode-status">Mode: Human vs AI</div>
-    <div id="status">Player X's turn</div>
+    <div id="status-bar">
+        <div id="mode-status">Mode: Human vs AI</div>
+        <div id="status">Player X's turn</div>
+    </div>
     <div id="mode-buttons">
     <button id="human-btn">Human vs Human</button>
     <button id="ai-btn">Human vs AI</button>
@@ -27,17 +29,26 @@
     </select>
     </div>
     <div id="ai-timer" style="margin-bottom:15px;">AI move time: -- ms</div>
-    <div id="game-board">
-        <div class="cell" data-index="0"></div>
-        <div class="cell" data-index="1"></div>
-        <div class="cell" data-index="2"></div>
-        <div class="cell" data-index="3"></div>
-        <div class="cell" data-index="4"></div>
-        <div class="cell" data-index="5"></div>
-        <div class="cell" data-index="6"></div>
-        <div class="cell" data-index="7"></div>
-        <div class="cell" data-index="8"></div>
+    <div id="main-content" style="display: flex; justify-content: center; align-items: flex-start; gap: 32px;">
+    <div id="game-board-container">
+        <div id="player-pick-container" style="display:none;">
+            <button id="pick-x-btn" class="pick-btn">Play as X</button>
+            <button id="pick-o-btn" class="pick-btn">Play as O</button>
+        </div>
+        <div id="game-board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
     </div>
+    <!-- If you have a move history container, it would go here -->
+</div>
     
 
     <script src="game.js"></script>
