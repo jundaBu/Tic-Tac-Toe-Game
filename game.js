@@ -8,14 +8,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const modeStatusDiv = document.getElementById('mode-status');
     const aiAlgoSelect = document.getElementById('ai-algo-select');
     const aiTimerDiv = document.getElementById('ai-timer');
+    const playerPickContainer = document.getElementById('player-pick-container');
+    const pickXBtn = document.getElementById('pick-x-btn');
+    const pickOBtn = document.getElementById('pick-o-btn');
 
     let board = Array(9).fill('');
     let currentPlayer = 'X';
     let gameActive = true;
     let mode = 'ai'; 
+    let aiVsAiActive = false;
 
-    const human = 'X';
-    const ai = 'O';
+    let human = 'X';
+    let ai = 'O';
     let aiAlgorithm = 'minimax'; 
 
     function checkWinner(b) {
@@ -35,8 +39,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function handleCellClick(e) {
+        // Prevent clicks in AI vs AI mode or when it's AI's turn in Human vs AI mode
+        if (!gameActive || mode === 'aivai' || (mode === 'ai' && currentPlayer === ai)) return;
+
         const idx = e.target.dataset.index;
-        if (!gameActive || board[idx]) return;
+        if (board[idx]) return;
 
         board[idx] = currentPlayer;
         e.target.textContent = currentPlayer;
@@ -53,26 +60,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentPlayer = ai;
                 statusDiv.textContent = "AI's turn";
                 setTimeout(() => {
-                    const start = performance.now();
-                    let aiMove;
-                    if (aiAlgorithm === 'minimax') {
-                        aiMove = findBestMove(board);
-                    } else {
-                        aiMove = findBestMoveAlphaBeta(board);
-                    }
-                    const end = performance.now();
-                    aiTimerDiv.textContent = `AI move time: ${(end - start).toFixed(2)} ms`;
-                    board[aiMove] = ai;
-                    cells[aiMove].textContent = ai;
-                    cells[aiMove].classList.add(ai.toLowerCase());
-                    const resultAfterAI = checkWinner(board);
-                    if (resultAfterAI) {
-                        endGame(resultAfterAI);
-                    } else {
-                        currentPlayer = human;
-                        statusDiv.textContent = `Player ${human}'s turn`;
-                    }
-                }, 300);
+                    setTimeout(() => { // <-- Add delay before AI move calculation
+                        const start = performance.now();
+                        let aiMove;
+                        if (aiAlgorithm === 'minimax') {
+                            aiMove = findBestMove(board);
+                        } else {
+                            aiMove = findBestMoveAlphaBeta(board);
+                        }
+                        const end = performance.now();
+                        aiTimerDiv.textContent = `AI move time: ${(end - start).toFixed(2)} ms`;
+                        board[aiMove] = ai;
+                        cells[aiMove].textContent = ai;
+                        cells[aiMove].classList.add(ai.toLowerCase());
+                        const resultAfterAI = checkWinner(board);
+                        if (resultAfterAI) {
+                            endGame(resultAfterAI);
+                        } else {
+                            currentPlayer = human;
+                            statusDiv.textContent = `Player ${human}'s turn`;
+                        }
+                    }, 300); // <-- 300ms delay before AI move calculation
+                }, 0);
             }
         } else if (mode === 'aivai') {
             setTimeout(aiVsAiTurn, 500);
@@ -107,6 +116,8 @@ document.addEventListener("DOMContentLoaded", function () {
             cell.classList.remove('highlight');
         });
         aiTimerDiv.textContent = "AI move time: -- ms";
+        aiVsAiActive = false;
+        aiAlgoSelect.disabled = false; // Enable algorithm choice on reset
     }
 
     function findBestMove(boardState) {
@@ -115,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
         for (let i = 0; i < 9; i++) {
             if (boardState[i] === '') {
                 boardState[i] = ai;
-                let score = minimax(boardState, 0, false);
+                let score = minimax(boardState, 0, false, ai, human);
                 boardState[i] = '';
                 if (score > bestScore) {
                     bestScore = score;
@@ -126,11 +137,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return move;
     }
 
-    function minimax(b, depth, isMaximizing) {
+    function minimax(b, depth, isMaximizing, aiPlayer, humanPlayer) {
         const result = checkWinner(b);
         if (result) {
-            if (result.winner === ai) return 10 - depth;
-            if (result.winner === human) return depth - 10;
+            if (result.winner === aiPlayer) return 10 - depth;
+            if (result.winner === humanPlayer) return depth - 10;
             if (result.winner === 'draw') return 0;
         }
 
@@ -138,8 +149,8 @@ document.addEventListener("DOMContentLoaded", function () {
             let bestScore = -Infinity;
             for (let i = 0; i < 9; i++) {
                 if (b[i] === '') {
-                    b[i] = ai;
-                    let score = minimax(b, depth + 1, false);
+                    b[i] = aiPlayer;
+                    let score = minimax(b, depth + 1, false, aiPlayer, humanPlayer);
                     b[i] = '';
                     bestScore = Math.max(score, bestScore);
                 }
@@ -149,8 +160,8 @@ document.addEventListener("DOMContentLoaded", function () {
             let bestScore = Infinity;
             for (let i = 0; i < 9; i++) {
                 if (b[i] === '') {
-                    b[i] = human;
-                    let score = minimax(b, depth + 1, true);
+                    b[i] = humanPlayer;
+                    let score = minimax(b, depth + 1, true, aiPlayer, humanPlayer);
                     b[i] = '';
                     bestScore = Math.min(score, bestScore);
                 }
@@ -165,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
         for (let i = 0; i < 9; i++) {
             if (boardState[i] === '') {
                 boardState[i] = ai;
-                let score = alphabeta(boardState, 0, false, -Infinity, Infinity);
+                let score = alphabeta(boardState, 0, false, -Infinity, Infinity, ai, human);
                 boardState[i] = '';
                 if (score > bestScore) {
                     bestScore = score;
@@ -176,11 +187,11 @@ document.addEventListener("DOMContentLoaded", function () {
         return move;
     }
 
-    function alphabeta(b, depth, isMaximizing, alpha, beta) {
+    function alphabeta(b, depth, isMaximizing, alpha, beta, aiPlayer, humanPlayer) {
         const result = checkWinner(b);
         if (result) {
-            if (result.winner === ai) return 10 - depth;
-            if (result.winner === human) return depth - 10;
+            if (result.winner === aiPlayer) return 10 - depth;
+            if (result.winner === humanPlayer) return depth - 10;
             if (result.winner === 'draw') return 0;
         }
 
@@ -188,8 +199,8 @@ document.addEventListener("DOMContentLoaded", function () {
             let bestScore = -Infinity;
             for (let i = 0; i < 9; i++) {
                 if (b[i] === '') {
-                    b[i] = ai;
-                    let score = alphabeta(b, depth + 1, false, alpha, beta);
+                    b[i] = aiPlayer;
+                    let score = alphabeta(b, depth + 1, false, alpha, beta, aiPlayer, humanPlayer);
                     b[i] = '';
                     bestScore = Math.max(score, bestScore);
                     alpha = Math.max(alpha, bestScore);
@@ -201,8 +212,8 @@ document.addEventListener("DOMContentLoaded", function () {
             let bestScore = Infinity;
             for (let i = 0; i < 9; i++) {
                 if (b[i] === '') {
-                    b[i] = human;
-                    let score = alphabeta(b, depth + 1, true, alpha, beta);
+                    b[i] = humanPlayer;
+                    let score = alphabeta(b, depth + 1, true, alpha, beta, aiPlayer, humanPlayer);
                     b[i] = '';
                     bestScore = Math.min(score, bestScore);
                     beta = Math.min(beta, bestScore);
@@ -217,67 +228,143 @@ document.addEventListener("DOMContentLoaded", function () {
         mode = newMode;
         resetGame();
         statusDiv.textContent = "Player X's turn";
+        // Always reset human/ai to X/O for AI vs AI and Human vs Human
         if (mode === 'ai') {
             modeStatusDiv.textContent = "Mode: Human vs AI";
+            aiVsAiActive = false;
+            aiAlgoSelect.disabled = false;
+            playerPickContainer.style.display = 'flex';
+            // Do not force human/ai here, allow player to pick
         } else if (mode === 'human') {
             modeStatusDiv.textContent = "Mode: Human vs Human";
+            aiVsAiActive = false;
+            aiAlgoSelect.disabled = false;
+            playerPickContainer.style.display = 'none';
+            human = 'X';
+            ai = 'O';
         } else if (mode === 'aivai') {
             modeStatusDiv.textContent = "Mode: AI vs AI";
+            aiVsAiActive = true;
+            aiAlgoSelect.disabled = true;
+            playerPickContainer.style.display = 'none';
+            human = 'X';
+            ai = 'O';
             setTimeout(aiVsAiTurn, 500);
         }
     }
 
     function aiVsAiTurn() {
-        if (!gameActive) return;
-        const start = performance.now();
-        let aiMove;
-        if (aiAlgorithm === 'minimax') {
-            aiMove = findBestMove(board);
-        } else {
-            aiMove = findBestMoveAlphaBeta(board);
-        }
-        const end = performance.now();
-        aiTimerDiv.textContent = `AI move time: ${(end - start).toFixed(2)} ms`;
-        board[aiMove] = currentPlayer;
-        cells[aiMove].textContent = currentPlayer;
-        cells[aiMove].classList.add(currentPlayer.toLowerCase());
-        const result = checkWinner(board);
-        if (result) {
-            endGame(result);
-            return;
-        }
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        statusDiv.textContent = `Player ${currentPlayer}'s turn`;
-        setTimeout(aiVsAiTurn, 500);
+        if (!gameActive || !aiVsAiActive) return;
+        setTimeout(() => {
+            if (!aiVsAiActive) return;
+            const start = performance.now();
+            let aiMove;
+            if (aiAlgorithm === 'minimax') {
+                aiMove = findBestMove(board);
+            } else {
+                aiMove = findBestMoveAlphaBeta(board);
+            }
+            const end = performance.now();
+            aiTimerDiv.textContent = `AI move time: ${(end - start).toFixed(2)} ms`;
+            board[aiMove] = currentPlayer;
+            cells[aiMove].textContent = currentPlayer;
+            cells[aiMove].classList.add(currentPlayer.toLowerCase());
+            const result = checkWinner(board);
+            if (result) {
+                endGame(result);
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusDiv.textContent = `Player ${currentPlayer}'s turn`;
+                aiVsAiTurn();
+            }
+        }, 500);
     }
 
-    // Set initial mode status on load
-    modeStatusDiv.textContent = mode === 'ai' ? "Mode: Human vs AI" : "Mode: Human vs Human";
-
-    // Randomize title colors and glow
-    function getRandomColor() {
+    // --- Randomize title colors and matching glow ---
+    function getRandomColorHSL() {
         const h = Math.floor(Math.random() * 360);
         const s = 70 + Math.floor(Math.random() * 30); // 70-100%
         const l = 50 + Math.floor(Math.random() * 20); // 50-70%
-        return `hsl(${h},${s}%,${l}%)`;
+        return { h, s, l, hsl: `hsl(${h},${s}%,${l}%)` };
     }
     function setTitleColorAndGlow(element) {
         if (!element) return;
-        const color = getRandomColor();
-        element.style.color = color;
-        // Use a strong glow with the same color, plus a subtle black shadow
-        element.style.textShadow = `0 0 18px ${color}, 2px 2px 8px rgba(0,0,0,0.25)`;
+        const { h, s, l, hsl } = getRandomColorHSL();
+        element.style.color = hsl;
+        // Use a strong glow with the same hue, slightly lighter and more transparent
+        const glow = `0 0 18px hsl(${h},${s}%,85%), 2px 2px 8px rgba(0,0,0,0.25)`;
+        element.style.textShadow = glow;
     }
     setTitleColorAndGlow(document.querySelector('.tic'));
     setTitleColorAndGlow(document.querySelector('.tac'));
     setTitleColorAndGlow(document.querySelector('.toe'));
 
-    aiBtn.addEventListener('click', () => setMode('ai'));
-    humanBtn.addEventListener('click', () => setMode('human'));
-    aivaiBtn.addEventListener('click', () => setMode('aivai'));
-    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+    // Event listeners
+    cells.forEach(cell => {
+        cell.addEventListener('click', handleCellClick);
+    });
+
     resetBtn.addEventListener('click', resetGame);
-    aiAlgoSelect.addEventListener('change', function () {
+
+    aiBtn.addEventListener('click', () => {
+        setMode('ai');
         aiAlgorithm = aiAlgoSelect.value;
+    });
+
+    humanBtn.addEventListener('click', () => {
+        setMode('human');
+    });
+
+    aivaiBtn.addEventListener('click', () => {
+        setMode('aivai');
+    });
+
+    aiAlgoSelect.addEventListener('change', (e) => {
+        aiAlgorithm = e.target.value;
+        if (mode === 'ai') {
+            resetGame();
+            statusDiv.textContent = "Player X's turn";
+        }
+    });
+
+    pickXBtn.addEventListener('click', function () {
+        human = 'X';
+        ai = 'O';
+        resetGame();
+        playerPickContainer.style.display = 'none';
+    });
+
+    pickOBtn.addEventListener('click', function () {
+        human = 'O';
+        ai = 'X';
+        resetGame();
+        playerPickContainer.style.display = 'none';
+        // If AI is X, let AI start
+        if (currentPlayer === ai && mode === 'ai') {
+            statusDiv.textContent = "AI's turn";
+            setTimeout(() => {
+                setTimeout(() => {
+                    const start = performance.now();
+                    let aiMove;
+                    if (aiAlgorithm === 'minimax') {
+                        aiMove = findBestMove(board);
+                    } else {
+                        aiMove = findBestMoveAlphaBeta(board);
+                    }
+                    const end = performance.now();
+                    aiTimerDiv.textContent = `AI move time: ${(end - start).toFixed(2)} ms`;
+                    board[aiMove] = ai;
+                    cells[aiMove].textContent = ai;
+                    cells[aiMove].classList.add(ai.toLowerCase());
+                    const resultAfterAI = checkWinner(board);
+                    if (resultAfterAI) {
+                        endGame(resultAfterAI);
+                    } else {
+                        currentPlayer = human;
+                        statusDiv.textContent = `Player ${human}'s turn`;
+                    }
+                }, 300);
+            }, 0);
+        }
     });
 });
