@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
         for (const pattern of winPatterns) {
             const [a, b1, c] = pattern;
             if (b[a] && b[a] === b[b1] && b[a] === b[c]) {
-                // Return both winner and winning pattern
+                
                 return { winner: b[a], pattern };
             }
         }
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function handleCellClick(e) {
-        // Prevent clicks in AI vs AI mode or when it's AI's turn in Human vs AI mode
+        
         if (!gameActive || mode === 'aivai' || (mode === 'ai' && currentPlayer === ai)) return;
 
         const idx = e.target.dataset.index;
@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 currentPlayer = ai;
                 statusDiv.textContent = "AI's turn";
                 setTimeout(() => {
-                    setTimeout(() => { // <-- Add delay before AI move calculation
+                    setTimeout(() => { 
                         const start = performance.now();
                         let aiMove;
                         if (aiAlgorithm === 'minimax') {
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             currentPlayer = human;
                             statusDiv.textContent = `Player ${human}'s turn`;
                         }
-                    }, 300); // <-- 300ms delay before AI move calculation
+                    }, 300); 
                 }, 0);
             }
         } else if (mode === 'aivai') {
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         aiTimerDiv.textContent = "AI move time: -- ms";
         aiVsAiActive = false;
-        aiAlgoSelect.disabled = false; // Enable algorithm choice on reset
+        aiAlgoSelect.disabled = false; 
     }
 
     function findBestMove(boardState) {
